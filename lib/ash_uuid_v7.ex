@@ -1,8 +1,6 @@
 defmodule AshUUIDv7 do
   @moduledoc """
-  Represents a UUID.
-
-  A builtin type that can be referenced via `:uuid_v7`
+  Represents a UUID version 7.
   """
 
   use Ash.Type

@@ -1,6 +1,8 @@
 if Code.ensure_loaded?(AshPostgres.CustomExtension) do
   defmodule AshUUIDv7.PostgresExtension do
-    @moduledoc false
+    @moduledoc """
+    The `AshUUIDv7` postgres extension.
+    """
 
     use AshPostgres.CustomExtension, name: :ash_uuid_v7, latest_version: 1
 
