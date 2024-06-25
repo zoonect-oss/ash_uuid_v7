@@ -1,0 +1,15 @@
+name: AshUUIDv7 CI
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+      - "v*"
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  ash-uuid-v7-ci:
+    uses: zoonect-oss/ash_uuid_v7/.github/workflows/ash-uuid-v7-ci.yml@main
+    secrets:
+      HEX_API_KEY: ${{ secrets.HEX_API_KEY }}

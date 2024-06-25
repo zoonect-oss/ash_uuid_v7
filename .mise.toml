@@ -1,0 +1,7 @@
+[env]
+# mise.file = [".env"]
+DATABASE_URL = "postgres://postgres:postgres@127.0.0.1:51016/ash_uuid_v7_test"
+
+[tools]
+erlang = "27.0"
+elixir = "1.17.0-otp-27"

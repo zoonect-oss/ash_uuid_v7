@@ -1,0 +1,243 @@
+name: AshUUIDv7 CI
+on:
+  workflow_call:
+    secrets:
+      HEX_API_KEY:
+        required: false
+    inputs:
+      spark-formatter:
+        type: boolean
+        default: true
+      sobelow:
+        type: boolean
+        default: true
+      postgres:
+        type: boolean
+        default: true
+      hex-api-key:
+        type: string
+
+jobs:
+  deps:
+    name: mix deps.get
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-deps-get@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+
+  build-test:
+    name: MIX_ENV=test mix.compile
+    runs-on: ubuntu-latest
+    needs: deps
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-compile@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: test
+          compile-assets: false
+
+  build-dev:
+    name: MIX_ENV=dev mix.compile
+    runs-on: ubuntu-latest
+    needs: deps
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-compile@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: dev
+          compile-assets: false
+
+  outdated:
+    name: mix hex.outdated
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-task@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: test
+          task: hex.outdated
+          compile-assets: false
+
+  unused:
+    name: mix deps.unlock --check-unused
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-task@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: test
+          task: deps.unlock --check-unused
+          compile-assets: false
+
+  audit:
+    name: mix hex.audit
+    runs-on: ubuntu-latest
+    needs: deps
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-hex-audit@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+
+  format:
+    name: mix format --check-formatted
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-format@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: test
+          compile-assets: false
+
+  docs:
+    name: mix docs
+    runs-on: ubuntu-latest
+    needs: build-dev
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-docs@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: dev
+          compile-assets: false
+
+  dialyzer:
+    name: mix dialyzer
+    runs-on: ubuntu-latest
+    needs: build-dev
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-dialyzer@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: dev
+          compile-assets: false
+
+  credo:
+    name: mix credo --strict
+    runs-on: ubuntu-latest
+    needs: build-dev
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-credo@main
+        if: ${{inputs.spark-formatter}}
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: dev
+          compile-assets: false
+
+  sobelow:
+    name: mix sobelow
+    runs-on: ubuntu-latest
+    needs: build-dev
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-task@main
+        if: ${{inputs.sobelow}}
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: dev
+          task: sobelow
+          compile-assets: false
+
+  test:
+    name: mix test
+    runs-on: ubuntu-latest
+    needs: build-test
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-task@main
+        if: ${{inputs.postgres}}
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: test
+          compile-assets: false
+          task: ash_postgres.generate_migrations
+      - uses: zoonect-oss/github-ops/actions/mix-task@main
+        if: ${{inputs.postgres}}
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: test
+          compile-assets: false
+          task: ash_postgres.create
+        env:
+          DATABASE_URL: "postgres://postgres:postgres@localhost:5432/ash_uuid_v7_test"
+      - uses: zoonect-oss/github-ops/actions/mix-task@main
+        if: ${{inputs.postgres}}
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: test
+          compile-assets: false
+          task: ash_postgres.migrate
+        env:
+          DATABASE_URL: "postgres://postgres:postgres@localhost:5432/ash_uuid_v7_test"
+      - uses: zoonect-oss/github-ops/actions/mix-test@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: test
+          compile-assets: false
+        env:
+          DATABASE_URL: "postgres://postgres:postgres@localhost:5432/ash_uuid_v7_test"
+
+  release:
+    needs:
+      - deps
+      - build-dev
+      - outdated
+      - unused
+      - audit
+      - format
+      - docs
+      - dialyzer
+      - credo
+      - sobelow
+      - test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    name: Release
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zoonect-oss/github-ops/actions/mix-hex-publish@main
+        with:
+          erlang-version: 27.0
+          elixir-version: 1.17
+          mix-env: dev
+          compile-assets: false
+          hex-api-key: ${{secrets.HEX_API_KEY}}
