@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.1.1](https://github.com/zoonect-oss/ash_uuid_v7/compare/v0.1.0...v0.1.1) (2024-07-01)
+
+
+
+
+### Improvements:
+
+* remove non-simple equality check
+
 ## [v0.1.0](https://github.com/zoonect-oss/ash_uuid_v7/compare/v0.1.0...v0.1.0) (2024-06-25)
 
 

@@ -2,7 +2,7 @@ defmodule AshUUIDv7.MixProject do
   use Mix.Project
 
   @name :ash_uuid_v7
-  @version "0.1.0"
+  @version "0.1.1"
   @description "Tools for using UUIDv7 id with Ash"
   @source_url "https://github.com/zoonect-oss/ash_uuid_v7"
 
