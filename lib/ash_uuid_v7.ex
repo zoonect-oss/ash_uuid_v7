@@ -65,8 +65,8 @@ defmodule AshUUIDv7 do
     cast_input(value, constraints)
   end
 
-  @impl true
-  def equal?(term1, term2), do: AshUUIDv7.Helpers.decode(term1) == AshUUIDv7.Helpers.decode(term2)
+  # @impl true
+  # def equal?(term1, term2), do: AshUUIDv7.Helpers.decode(term1) == AshUUIDv7.Helpers.decode(term2)
 
   @compile {:inline, c: 1}
 

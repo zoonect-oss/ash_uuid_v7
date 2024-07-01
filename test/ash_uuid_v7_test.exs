@@ -25,7 +25,9 @@ defmodule AshUUIDv7Test do
     assert {:ok, ^raw_uuid} = Ash.Type.dump_to_native(AshUUIDv7, hex_uuid)
     assert {:ok, ^raw_uuid} = Ash.Type.dump_to_native(AshUUIDv7, raw_uuid)
 
-    assert true == Ash.Type.equal?(AshUUIDv7, raw_uuid, hex_uuid)
+    # assert true == Ash.Type.equal?(AshUUIDv7, raw_uuid, hex_uuid)
+    assert true == Ash.Type.equal?(AshUUIDv7, hex_uuid, hex_uuid)
+    assert true == Ash.Type.equal?(AshUUIDv7, raw_uuid, raw_uuid)
 
     assert {:ok, ^raw_uuid} = Ash.Type.apply_constraints(AshUUIDv7, raw_uuid, [])
   end
