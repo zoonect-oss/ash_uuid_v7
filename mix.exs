@@ -2,7 +2,7 @@ defmodule AshUUIDv7.MixProject do
   use Mix.Project
 
   @name :ash_uuid_v7
-  @version "0.1.1"
+  @version "0.1.2"
   @description "Tools for using UUIDv7 id with Ash"
   @source_url "https://github.com/zoonect-oss/ash_uuid_v7"
 
@@ -42,8 +42,8 @@ defmodule AshUUIDv7.MixProject do
 
   defp deps do
     [
-      {:ash, "~> 3.0.0"},
-      {:ash_postgres, "~> 2.0.0"},
+      {:ash, "~> 3.0"},
+      {:ash_postgres, "~> 2.0"},
       # Testing, documentation, and release tools
       {:mix_test_interactive, ">= 0.0.0", only: :test, runtime: false},
       {:mix_audit, ">= 0.0.0", only: [:dev, :test], runtime: false},
